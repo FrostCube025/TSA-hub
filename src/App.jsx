@@ -42,6 +42,11 @@ export default function App() {
             />
 
             <Route
+              path="classes"
+              element={<Classes />}
+            />
+
+            <Route
               path="projects"
               element={<Projects />}
             />
