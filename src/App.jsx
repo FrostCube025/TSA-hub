@@ -12,6 +12,7 @@ import Admin from "./pages/Admin"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Profile from "./pages/Profile"
+import Classes from "./pages/Classes"
 
 export default function App() {
   return (
