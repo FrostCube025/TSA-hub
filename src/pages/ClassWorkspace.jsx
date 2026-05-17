@@ -4,7 +4,7 @@ export default function ClassWorkspace() {
   const { classId } = useParams()
 
   return (
-    <div className="h-[calc(100vh-120px)] overflow-hidden">
+   <div className="min-h-[calc(100vh-180px)] pb-8">
       <Link
         to="/classes"
         className="text-xs font-black uppercase tracking-[0.2em] text-cyan-200"
@@ -12,7 +12,7 @@ export default function ClassWorkspace() {
         ← Back to Classes
       </Link>
 
-      <div className="mt-6 grid h-full gap-6 lg:grid-cols-[260px_1fr]">
+     <div className="mt-6 grid min-h-[650px] gap-6 lg:grid-cols-[260px_1fr]">
         <div className="border border-white/10 bg-zinc-950 p-4">
           <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
             Channels
