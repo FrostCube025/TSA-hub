@@ -1,7 +1,7 @@
 import {
+  CalendarDays,
   ClipboardList,
   Home,
-  MessageCircle,
   ShieldCheck,
   Trophy,
   UserRound,
@@ -13,7 +13,7 @@ export const pages = [
   { id: "classes", label: "Classes", path: "/classes", icon: Users },
   { id: "projects", label: "Projects", path: "/projects", icon: Trophy },
   { id: "assignments", label: "Work", path: "/assignments", icon: ClipboardList },
-  { id: "chat", label: "Chat", path: "/chat", icon: MessageCircle },
+  { id: "calendar", label: "Calendar", path: "/calendar", icon: CalendarDays },
   { id: "profile", label: "Profile", path: "/profile", icon: UserRound },
   { id: "admin", label: "Admin", path: "/admin", icon: ShieldCheck },
 ]
