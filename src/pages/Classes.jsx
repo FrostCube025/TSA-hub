@@ -11,13 +11,10 @@ export default function Classes() {
   const { user, tags } = useAuth()
 
   const [classes, setClasses] = useState([])
-
   const [className, setClassName] = useState("")
   const [schoolName, setSchoolName] = useState("")
   const [joinCode, setJoinCode] = useState("")
-
   const [joinInput, setJoinInput] = useState("")
-
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
 
@@ -53,7 +50,6 @@ export default function Classes() {
 
   async function createClass(e) {
     e.preventDefault()
-
     setLoading(true)
     setMessage("")
 
@@ -86,17 +82,13 @@ export default function Classes() {
     setClassName("")
     setSchoolName("")
     setJoinCode(code)
-
     setMessage("Class created successfully.")
-
     loadClasses()
-
     setLoading(false)
   }
 
   async function joinClass(e) {
     e.preventDefault()
-
     setLoading(true)
     setMessage("")
 
@@ -138,8 +130,8 @@ export default function Classes() {
   }, [user])
 
   return (
-    <div>
-      <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-cyan-200">
+    <div className="pb-24">
+      <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-[#21c064]">
         Classes
       </p>
 
@@ -152,7 +144,7 @@ export default function Classes() {
       </p>
 
       {message && (
-        <div className="mt-6 border border-cyan-300/20 bg-cyan-300/10 p-4 font-bold text-cyan-100">
+        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-700">
           {message}
         </div>
       )}
@@ -160,9 +152,9 @@ export default function Classes() {
       <div className={`mt-10 grid gap-6 ${canCreateClass ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
         <form
           onSubmit={joinClass}
-          className="border border-[#e5e7eb] bg-white p-6"
+          className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm"
         >
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-[#6b7280]">
             Join Class
           </p>
 
@@ -170,12 +162,12 @@ export default function Classes() {
             value={joinInput}
             onChange={(e) => setJoinInput(e.target.value)}
             placeholder="Enter join code"
-            className="mt-5 w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-slate-500"
+            className="mt-5 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
           />
 
           <button
             disabled={loading}
-            className="mt-5 bg-cyan-300 px-6 py-4 font-black text-slate-950"
+            className="mt-5 rounded-2xl bg-[#21c064] px-6 py-4 font-black text-white disabled:opacity-60"
           >
             Join Class
           </button>
@@ -184,9 +176,9 @@ export default function Classes() {
         {canCreateClass && (
           <form
             onSubmit={createClass}
-            className="border border-[#e5e7eb] bg-white p-6"
+            className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm"
           >
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-[#6b7280]">
               Create Class
             </p>
 
@@ -194,30 +186,30 @@ export default function Classes() {
               value={className}
               onChange={(e) => setClassName(e.target.value)}
               placeholder="Class name"
-              className="mt-5 w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-slate-500"
+              className="mt-5 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
             />
 
             <input
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
               placeholder="School name"
-              className="mt-4 w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-slate-500"
+              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
             />
 
             <button
               disabled={loading}
-              className="mt-5 bg-cyan-300 px-6 py-4 font-black text-slate-950"
+              className="mt-5 rounded-2xl bg-[#21c064] px-6 py-4 font-black text-white disabled:opacity-60"
             >
               Create Class
             </button>
 
             {joinCode && (
-              <div className="mt-5 border border-yellow-300/20 bg-yellow-400/10 p-4">
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-yellow-300">
+              <div className="mt-5 rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-yellow-700">
                   Join Code
                 </p>
 
-                <p className="mt-2 text-3xl font-black text-yellow-100">
+                <p className="mt-2 text-3xl font-black text-yellow-800">
                   {joinCode}
                 </p>
               </div>
@@ -227,13 +219,13 @@ export default function Classes() {
       </div>
 
       <div className="mt-12">
-        <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-[#6b7280]">
           My Classes
         </p>
 
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {classes.length === 0 ? (
-            <div className="border border-[#e5e7eb] bg-white p-6">
+            <div className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
               <p className="font-black text-[#111827]">
                 No classes joined yet.
               </p>
@@ -243,7 +235,7 @@ export default function Classes() {
               <Link
                 key={item.id}
                 to={`/classes/${item.id}`}
-                className="block border border-[#e5e7eb] bg-white p-6 transition hover:border-cyan-300/30 hover:bg-white/[0.03]"
+                className="block rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm transition hover:border-[#21c064]/40 hover:shadow-md"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -251,24 +243,24 @@ export default function Classes() {
                       {item.name}
                     </h2>
 
-                    <p className="mt-2 text-slate-400">
+                    <p className="mt-2 text-[#6b7280]">
                       {item.school_name}
                     </p>
                   </div>
 
                   <span
-                    className={`px-3 py-2 text-sm font-black ${
+                    className={`rounded-full px-3 py-2 text-sm font-black ${
                       item.approved
-                        ? "bg-cyan-300/10 text-cyan-200"
-                        : "bg-yellow-400/10 text-yellow-200"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-yellow-50 text-yellow-700"
                     }`}
                   >
                     {item.approved ? "Approved" : "Pending"}
                   </span>
                 </div>
 
-                <div className="mt-5 border border-[#e5e7eb] bg-white/5 p-4">
-                  <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+                <div className="mt-5 rounded-2xl bg-[#f9fafb] p-4">
+                  <p className="text-sm font-black uppercase tracking-[0.2em] text-[#6b7280]">
                     Join Code
                   </p>
 
