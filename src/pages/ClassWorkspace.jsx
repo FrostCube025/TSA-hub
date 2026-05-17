@@ -4,56 +4,117 @@ export default function ClassWorkspace() {
   const { classId } = useParams()
 
   return (
-    <div>
-      <Link to="/classes" className="text-sm font-black text-cyan-200">
+    <div className="h-[calc(100vh-120px)] overflow-hidden">
+      <Link
+        to="/classes"
+        className="text-xs font-black uppercase tracking-[0.2em] text-cyan-200"
+      >
         ← Back to Classes
       </Link>
 
-      <p className="mt-8 mb-3 text-sm font-black uppercase tracking-[0.25em] text-cyan-200">
-        Class Workspace
-      </p>
-
-      <h1 className="text-5xl font-black text-white">
-        TSA Class Hub
-      </h1>
-
-      <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
-        This will become the private workspace for this class, including channels, members, assignments, submissions, and class chat.
-      </p>
-
-      <div className="mt-10 grid gap-6 lg:grid-cols-[280px_1fr]">
-        <div className="border border-white/10 bg-zinc-950 p-5">
-          <p className="mb-4 text-sm font-black uppercase tracking-[0.2em] text-slate-400">
+      <div className="mt-6 grid h-full gap-6 lg:grid-cols-[260px_1fr]">
+        <div className="border border-white/10 bg-zinc-950 p-4">
+          <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
             Channels
           </p>
 
-          {["general", "announcements", "webmaster", "coding", "officers"].map((channel) => (
-            <button
-              key={channel}
-              className="mb-2 block w-full bg-white/5 px-4 py-3 text-left font-black text-white"
-            >
-              #{channel}
-            </button>
-          ))}
+          <div className="space-y-1">
+            {[
+              "general",
+              "announcements",
+              "webmaster",
+              "coding",
+              "officers",
+            ].map((channel, index) => (
+              <button
+                key={channel}
+                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-bold transition ${
+                  index === 0
+                    ? "bg-white/10 text-white"
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <span className="text-slate-500">#</span>
+                {channel}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-8 border-t border-white/10 pt-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-600">
+              Class ID
+            </p>
+
+            <p className="mt-2 break-all text-xs text-slate-500">
+              {classId}
+            </p>
+          </div>
         </div>
 
-        <div className="border border-white/10 bg-zinc-950 p-6">
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
-            Class ID
-          </p>
+        <div className="flex h-full flex-col border border-white/10 bg-zinc-950">
+          <div className="border-b border-white/10 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500">#</span>
 
-          <p className="mt-2 break-all text-cyan-200">
-            {classId}
-          </p>
+              <h1 className="text-lg font-black text-white">
+                general
+              </h1>
+            </div>
 
-          <div className="mt-8 border border-white/10 bg-white/5 p-6">
-            <h2 className="text-3xl font-black text-white">
-              #general
-            </h2>
-
-            <p className="mt-3 text-slate-300">
-              Real class-based chat will go here next.
+            <p className="mt-2 text-sm text-slate-400">
+              Class-wide announcements and discussion.
             </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-6">
+              {[
+                {
+                  name: "FrostCube",
+                  tags: ["Creator", "Founding Member"],
+                  text: "Welcome to the TSA class workspace.",
+                },
+                {
+                  name: "Ava",
+                  tags: ["Verified", "Webmaster"],
+                  text: "The new website layout looks really clean.",
+                },
+              ].map((msg) => (
+                <div key={msg.text} className="flex gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-cyan-300 font-black text-slate-950">
+                    {msg.name.charAt(0)}
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-black text-white">
+                        {msg.name}
+                      </p>
+
+                      {msg.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="border border-cyan-300/20 bg-cyan-300/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-cyan-200"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="mt-2 leading-7 text-slate-300">
+                      {msg.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 p-4">
+            <input
+              placeholder="Message #general"
+              className="w-full border border-white/10 bg-white/5 px-5 py-4 text-white outline-none placeholder:text-slate-500"
+            />
           </div>
         </div>
       </div>
