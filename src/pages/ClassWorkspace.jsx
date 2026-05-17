@@ -13,7 +13,7 @@ export default function ClassWorkspace() {
       </Link>
 
      <div className="mt-6 grid min-h-[650px] gap-6 lg:grid-cols-[260px_1fr]">
-        <div className="border border-white/10 bg-zinc-950 p-4">
+        <div className="border border-[#e5e7eb] bg-white p-4">
           <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-slate-500">
             Channels
           </p>
@@ -30,8 +30,8 @@ export default function ClassWorkspace() {
                 key={channel}
                 className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-bold transition ${
                   index === 0
-                    ? "bg-white/10 text-white"
-                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-white/10 text-[#111827]"
+                    : "text-slate-400 hover:bg-white/5 hover:text-[#111827]"
                 }`}
               >
                 <span className="text-slate-500">#</span>
@@ -40,7 +40,7 @@ export default function ClassWorkspace() {
             ))}
           </div>
 
-          <div className="mt-8 border-t border-white/10 pt-4">
+          <div className="mt-8 border-t border-[#e5e7eb] pt-4">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-600">
               Class ID
             </p>
@@ -51,12 +51,12 @@ export default function ClassWorkspace() {
           </div>
         </div>
 
-        <div className="flex h-full flex-col border border-white/10 bg-zinc-950">
-          <div className="border-b border-white/10 px-6 py-4">
+        <div className="flex h-full flex-col border border-[#e5e7eb] bg-white">
+          <div className="border-b border-[#e5e7eb] px-6 py-4">
             <div className="flex items-center gap-2">
               <span className="text-slate-500">#</span>
 
-              <h1 className="text-lg font-black text-white">
+              <h1 className="text-lg font-black text-[#111827]">
                 general
               </h1>
             </div>
@@ -87,7 +87,7 @@ export default function ClassWorkspace() {
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-black text-white">
+                      <p className="font-black text-[#111827]">
                         {msg.name}
                       </p>
 
@@ -101,7 +101,7 @@ export default function ClassWorkspace() {
                       ))}
                     </div>
 
-                    <p className="mt-2 leading-7 text-slate-300">
+                    <p className="mt-2 leading-7 text-[#4b5563]">
                       {msg.text}
                     </p>
                   </div>
@@ -110,10 +110,10 @@ export default function ClassWorkspace() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 p-4">
+          <div className="border-t border-[#e5e7eb] p-4">
             <input
               placeholder="Message #general"
-              className="w-full border border-white/10 bg-white/5 px-5 py-4 text-white outline-none placeholder:text-slate-500"
+              className="w-full border border-[#e5e7eb] bg-white/5 px-5 py-4 text-[#111827] outline-none placeholder:text-slate-500"
             />
           </div>
         </div>
