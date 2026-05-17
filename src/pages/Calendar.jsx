@@ -1,31 +1,6 @@
-import { useMemo, useState } from "react"
-
-const initialEvents = [
-  {
-    id: 1,
-    title: "Webmaster Meeting",
-    date: "2026-05-18",
-    time: "3:30 PM",
-    type: "meeting",
-    description: "Team meeting for website updates and project planning.",
-  },
-  {
-    id: 2,
-    title: "Coding Competition Prep",
-    date: "2026-05-21",
-    time: "4:00 PM",
-    type: "competition",
-    description: "Practice session for coding competition members.",
-  },
-  {
-    id: 3,
-    title: "Regional TSA Deadline",
-    date: "2026-05-28",
-    time: "11:59 PM",
-    type: "deadline",
-    description: "Final deadline for regional TSA materials.",
-  },
-]
+import { useEffect, useMemo, useState } from "react"
+import { supabase } from "../lib/supabaseClient"
+import { useAuth } from "../context/AuthContext"
 
 const typeStyles = {
   meeting: "bg-[#21c064] text-white",
@@ -35,20 +10,55 @@ const typeStyles = {
 }
 
 export default function Calendar() {
-  const [events, setEvents] = useState(initialEvents)
+  const { user } = useAuth()
+
+  const [events, setEvents] = useState([])
+  const [posts, setPosts] = useState([])
+
   const [selectedEvent, setSelectedEvent] = useState(null)
+
   const [title, setTitle] = useState("")
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
   const [type, setType] = useState("task")
   const [description, setDescription] = useState("")
 
+  const [message, setMessage] = useState("")
+
   const year = 2026
   const month = 4
+
+  async function loadEvents() {
+    const { data } = await supabase
+      .from("calendar_events")
+      .select("*")
+      .order("event_date", { ascending: true })
+
+    if (data) {
+      setEvents(data)
+    }
+  }
+
+  async function loadPosts() {
+    const { data } = await supabase
+      .from("feed_posts")
+      .select("*")
+      .order("created_at", { ascending: false })
+
+    if (data) {
+      setPosts(data)
+    }
+  }
+
+  useEffect(() => {
+    loadEvents()
+    loadPosts()
+  }, [])
 
   const days = useMemo(() => {
     const firstDay = new Date(year, month, 1).getDay()
     const daysInMonth = new Date(year, month + 1, 0).getDate()
+
     const cells = []
 
     for (let i = 0; i < firstDay; i++) {
@@ -66,28 +76,36 @@ export default function Calendar() {
     return `${year}-05-${String(day).padStart(2, "0")}`
   }
 
-  function createEvent(e) {
+  async function createEvent(e) {
     e.preventDefault()
 
     if (!title || !date) return
 
-    setEvents([
-      ...events,
-      {
-        id: Date.now(),
+    const { error } = await supabase
+      .from("calendar_events")
+      .insert({
+        creator_id: user.id,
         title,
-        date,
-        time: time || "All day",
-        type,
+        event_date: date,
+        event_time: time,
+        event_type: type,
         description,
-      },
-    ])
+      })
+
+    if (error) {
+      setMessage(error.message)
+      return
+    }
+
+    setMessage("Event created.")
 
     setTitle("")
     setDate("")
     setTime("")
     setType("task")
     setDescription("")
+
+    loadEvents()
   }
 
   return (
@@ -104,6 +122,12 @@ export default function Calendar() {
         Track TSA meetings, deadlines, competitions, announcements, and personal tasks.
       </p>
 
+      {message && (
+        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-700">
+          {message}
+        </div>
+      )}
+
       <div className="mt-10 grid gap-6 xl:grid-cols-[1fr_380px]">
         <div className="rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
@@ -115,21 +139,6 @@ export default function Calendar() {
               <h2 className="mt-2 text-3xl font-black text-[#111827]">
                 May 2026
               </h2>
-            </div>
-
-            <div className="flex gap-2">
-              <span className="rounded-full bg-[#21c064] px-3 py-2 text-xs font-black text-white">
-                Meeting
-              </span>
-              <span className="rounded-full bg-red-500 px-3 py-2 text-xs font-black text-white">
-                Deadline
-              </span>
-              <span className="rounded-full bg-blue-500 px-3 py-2 text-xs font-black text-white">
-                Competition
-              </span>
-              <span className="rounded-full bg-yellow-400 px-3 py-2 text-xs font-black text-[#111827]">
-                Task
-              </span>
             </div>
           </div>
 
@@ -144,7 +153,7 @@ export default function Calendar() {
           <div className="mt-2 grid grid-cols-7 gap-2">
             {days.map((day, index) => {
               const dayEvents = day
-                ? events.filter((event) => event.date === eventDate(day))
+                ? events.filter((event) => event.event_date === eventDate(day))
                 : []
 
               return (
@@ -168,7 +177,7 @@ export default function Calendar() {
                             key={event.id}
                             onClick={() => setSelectedEvent(event)}
                             className={`block w-full truncate rounded-full px-2 py-1 text-left text-[11px] font-black ${
-                              typeStyles[event.type]
+                              typeStyles[event.event_type]
                             }`}
                           >
                             {event.title}
@@ -196,27 +205,27 @@ export default function Calendar() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Title"
-              className="mt-5 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
+              className="mt-5 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none"
             />
 
             <input
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none focus:border-[#21c064]"
+              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none"
             />
 
             <input
               value={time}
               onChange={(e) => setTime(e.target.value)}
               placeholder="Time"
-              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
+              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none"
             />
 
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none focus:border-[#21c064]"
+              className="mt-4 w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none"
             >
               <option value="task">Task</option>
               <option value="meeting">Meeting</option>
@@ -229,7 +238,7 @@ export default function Calendar() {
               onChange={(e) => setDescription(e.target.value)}
               rows="4"
               placeholder="Description"
-              className="mt-4 w-full resize-none rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
+              className="mt-4 w-full resize-none rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none"
             />
 
             <button className="mt-5 w-full rounded-2xl bg-[#21c064] px-6 py-4 font-black text-white">
@@ -243,21 +252,28 @@ export default function Calendar() {
             </p>
 
             <div className="mt-5 space-y-4">
-              {events.slice(-3).reverse().map((event) => (
-                <button
-                  key={event.id}
-                  onClick={() => setSelectedEvent(event)}
-                  className="w-full rounded-2xl bg-[#f9fafb] p-4 text-left"
-                >
+              {posts.length === 0 ? (
+                <div className="rounded-2xl bg-[#f9fafb] p-5">
                   <p className="font-black text-[#111827]">
-                    {event.title}
+                    No announcements yet.
                   </p>
+                </div>
+              ) : (
+                posts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="rounded-3xl border border-[#e5e7eb] bg-[#f9fafb] p-6"
+                  >
+                    <p className="font-black text-[#111827]">
+                      {post.title}
+                    </p>
 
-                  <p className="mt-1 text-sm text-[#6b7280]">
-                    {event.date} • {event.time}
-                  </p>
-                </button>
-              ))}
+                    <p className="mt-3 leading-7 text-[#4b5563]">
+                      {post.body}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -270,10 +286,10 @@ export default function Calendar() {
               <div>
                 <span
                   className={`rounded-full px-3 py-2 text-xs font-black ${
-                    typeStyles[selectedEvent.type]
+                    typeStyles[selectedEvent.event_type]
                   }`}
                 >
-                  {selectedEvent.type}
+                  {selectedEvent.event_type}
                 </span>
 
                 <h2 className="mt-5 text-3xl font-black text-[#111827]">
@@ -281,7 +297,7 @@ export default function Calendar() {
                 </h2>
 
                 <p className="mt-3 font-bold text-[#6b7280]">
-                  {selectedEvent.date} • {selectedEvent.time}
+                  {selectedEvent.event_date} • {selectedEvent.event_time}
                 </p>
 
                 <p className="mt-5 leading-7 text-[#4b5563]">
