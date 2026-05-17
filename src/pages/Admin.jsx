@@ -49,11 +49,11 @@ export default function Admin() {
         Admin
       </p>
 
-      <h1 className="text-5xl font-black text-white">
+      <h1 className="text-5xl font-black text-[#111827]">
         Approval Center
       </h1>
 
-      <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
+      <p className="mt-4 max-w-3xl text-lg leading-8 text-[#4b5563]">
         Review pending TSA Hub accounts and approve verified members.
       </p>
 
@@ -65,19 +65,19 @@ export default function Admin() {
 
       <div className="mt-10 space-y-4">
         {loading ? (
-          <p className="text-slate-300">Loading pending users...</p>
+          <p className="text-[#4b5563]">Loading pending users...</p>
         ) : pendingUsers.length === 0 ? (
-          <div className="border border-white/10 bg-zinc-950 p-6">
-            <p className="font-black text-white">No pending users.</p>
+          <div className="border border-white/10 bg-white p-6">
+            <p className="font-black text-[#111827]">No pending users.</p>
           </div>
         ) : (
           pendingUsers.map((user) => (
             <div
               key={user.id}
-              className="flex flex-col gap-4 border border-white/10 bg-zinc-950 p-6 md:flex-row md:items-center md:justify-between"
+              className="flex flex-col gap-4 border border-white/10 bg-white p-6 md:flex-row md:items-center md:justify-between"
             >
               <div>
-                <p className="text-xl font-black text-white">
+                <p className="text-xl font-black text-[#111827]">
                   @{user.username || "no_username"}
                 </p>
 
