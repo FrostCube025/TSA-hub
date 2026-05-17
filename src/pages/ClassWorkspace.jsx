@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext"
 
 export default function ClassWorkspace() {
   const { classId } = useParams()
-  const { user, profile, tags } = useAuth()
+  const { user } = useAuth()
 
   const [channels, setChannels] = useState([])
   const [selectedChannel, setSelectedChannel] = useState(null)
@@ -38,7 +38,15 @@ export default function ClassWorkspace() {
 
     const { data, error } = await supabase
       .from("messages")
-      .select("*")
+      .select(`
+        *,
+        profiles (
+          id,
+          username,
+          display_name,
+          email
+        )
+      `)
       .eq("channel_id", channelId)
       .order("created_at", { ascending: true })
 
@@ -202,36 +210,36 @@ export default function ClassWorkspace() {
                   </p>
                 </div>
               ) : (
-                messages.map((message) => (
-                  <div key={message.id} className="flex gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#21c064] font-black text-white">
-                      {(profile?.display_name || profile?.username || "U")
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
+                messages.map((message) => {
+                  const senderName =
+                    message.profiles?.display_name ||
+                    message.profiles?.username ||
+                    "Member"
 
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-black text-[#111827]">
-                          {profile?.display_name || profile?.username || "Member"}
-                        </p>
-
-                        {tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag.id}
-                            className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700"
-                          >
-                            {tag.name}
-                          </span>
-                        ))}
+                  return (
+                    <div key={message.id} className="flex gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#21c064] font-black text-white">
+                        {senderName.charAt(0).toUpperCase()}
                       </div>
 
-                      <p className="mt-2 leading-7 text-[#374151]">
-                        {message.text}
-                      </p>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-black text-[#111827]">
+                            {senderName}
+                          </p>
+
+                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                            Member
+                          </span>
+                        </div>
+
+                        <p className="mt-2 leading-7 text-[#374151]">
+                          {message.text}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                })
               )}
             </div>
           </div>
