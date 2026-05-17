@@ -5,14 +5,23 @@ import { useAuth } from "../context/AuthContext"
 
 export default function ClassWorkspace() {
   const { classId } = useParams()
-  const { user } = useAuth()
+  const { user, tags } = useAuth()
 
   const [channels, setChannels] = useState([])
   const [selectedChannel, setSelectedChannel] = useState(null)
+
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState("")
+
+  const [channelName, setChannelName] = useState("")
+  const [restricted, setRestricted] = useState(false)
+
   const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState("")
+
+  const canCreateChannels = tags.some((tag) =>
+    ["creator", "admin", "coordinator", "teacher"].includes(tag.id)
+  )
 
   async function loadChannels() {
     const { data, error } = await supabase
@@ -84,6 +93,38 @@ export default function ClassWorkspace() {
     setLoading(false)
   }
 
+  async function createChannel(e) {
+    e.preventDefault()
+
+    if (!channelName.trim()) return
+
+    setLoading(true)
+    setNotice("")
+
+    const { error } = await supabase
+      .from("class_channels")
+      .insert({
+        class_id: classId,
+        name: channelName.trim().toLowerCase(),
+        restricted,
+        created_by: user.id,
+      })
+
+    if (error) {
+      setNotice(error.message)
+      setLoading(false)
+      return
+    }
+
+    setChannelName("")
+    setRestricted(false)
+
+    await loadChannels()
+
+    setNotice("Channel created.")
+    setLoading(false)
+  }
+
   useEffect(() => {
     loadChannels()
   }, [classId])
@@ -115,18 +156,20 @@ export default function ClassWorkspace() {
       </div>
 
       {notice && (
-        <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 font-bold text-red-700">
+        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-700">
           {notice}
         </div>
       )}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[260px_1fr]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
         <aside className="rounded-3xl border border-[#e5e7eb] bg-white p-4 shadow-sm">
-          <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#6b7280]">
-            Channels
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6b7280]">
+              Channels
+            </p>
+          </div>
 
-          <div className="space-y-1">
+          <div className="mt-4 space-y-1">
             {channels.length === 0 ? (
               <p className="rounded-2xl bg-[#f9fafb] p-4 text-sm font-bold text-[#6b7280]">
                 No channels yet.
@@ -168,6 +211,38 @@ export default function ClassWorkspace() {
               })
             )}
           </div>
+
+          {canCreateChannels && (
+            <form onSubmit={createChannel} className="mt-8">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[#6b7280]">
+                Create Channel
+              </p>
+
+              <input
+                value={channelName}
+                onChange={(e) => setChannelName(e.target.value)}
+                placeholder="channel-name"
+                className="w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-4 py-3 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
+              />
+
+              <label className="mt-4 flex items-center gap-3 text-sm font-bold text-[#4b5563]">
+                <input
+                  type="checkbox"
+                  checked={restricted}
+                  onChange={(e) => setRestricted(e.target.checked)}
+                />
+
+                Private Channel
+              </label>
+
+              <button
+                disabled={loading}
+                className="mt-4 w-full rounded-2xl bg-[#21c064] px-4 py-3 font-black text-white disabled:opacity-60"
+              >
+                Create Channel
+              </button>
+            </form>
+          )}
 
           <div className="mt-8 rounded-2xl bg-[#f9fafb] p-4">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#9ca3af]">
