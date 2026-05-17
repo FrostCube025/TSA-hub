@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { supabase } from "../lib/supabaseClient"
 import { useAuth } from "../context/AuthContext"
 
@@ -239,9 +240,10 @@ export default function Classes() {
             </div>
           ) : (
             classes.map((item) => (
-              <div
+              <Link
                 key={item.id}
-                className="border border-white/10 bg-zinc-950 p-6"
+                to={`/classes/${item.id}`}
+                className="block border border-white/10 bg-zinc-950 p-6 transition hover:border-cyan-300/30 hover:bg-white/[0.03]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -274,7 +276,7 @@ export default function Classes() {
                     {item.join_code}
                   </p>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>
