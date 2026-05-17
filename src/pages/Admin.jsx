@@ -67,14 +67,14 @@ export default function Admin() {
         {loading ? (
           <p className="text-[#4b5563]">Loading pending users...</p>
         ) : pendingUsers.length === 0 ? (
-          <div className="border border-white/10 bg-white p-6">
+          <div className="border border-[#e5e7eb] bg-white p-6">
             <p className="font-black text-[#111827]">No pending users.</p>
           </div>
         ) : (
           pendingUsers.map((user) => (
             <div
               key={user.id}
-              className="flex flex-col gap-4 border border-white/10 bg-white p-6 md:flex-row md:items-center md:justify-between"
+              className="flex flex-col gap-4 border border-[#e5e7eb] bg-white p-6 md:flex-row md:items-center md:justify-between"
             >
               <div>
                 <p className="text-xl font-black text-[#111827]">
