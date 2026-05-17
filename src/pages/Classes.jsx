@@ -143,11 +143,11 @@ export default function Classes() {
         Classes
       </p>
 
-      <h1 className="text-5xl font-black text-white">
+      <h1 className="text-5xl font-black text-[#111827]">
         TSA Classes
       </h1>
 
-      <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">
+      <p className="mt-4 max-w-3xl text-lg leading-8 text-[#4b5563]">
         Join your TSA team spaces, collaborate with members, and access class-specific chats, assignments, and projects.
       </p>
 
@@ -160,7 +160,7 @@ export default function Classes() {
       <div className={`mt-10 grid gap-6 ${canCreateClass ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
         <form
           onSubmit={joinClass}
-          className="border border-white/10 bg-zinc-950 p-6"
+          className="border border-[#e5e7eb] bg-white p-6"
         >
           <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
             Join Class
@@ -170,7 +170,7 @@ export default function Classes() {
             value={joinInput}
             onChange={(e) => setJoinInput(e.target.value)}
             placeholder="Enter join code"
-            className="mt-5 w-full border border-white/10 bg-white/10 px-5 py-4 font-bold text-white outline-none placeholder:text-slate-500"
+            className="mt-5 w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-slate-500"
           />
 
           <button
@@ -184,7 +184,7 @@ export default function Classes() {
         {canCreateClass && (
           <form
             onSubmit={createClass}
-            className="border border-white/10 bg-zinc-950 p-6"
+            className="border border-[#e5e7eb] bg-white p-6"
           >
             <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
               Create Class
@@ -194,14 +194,14 @@ export default function Classes() {
               value={className}
               onChange={(e) => setClassName(e.target.value)}
               placeholder="Class name"
-              className="mt-5 w-full border border-white/10 bg-white/10 px-5 py-4 font-bold text-white outline-none placeholder:text-slate-500"
+              className="mt-5 w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-slate-500"
             />
 
             <input
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
               placeholder="School name"
-              className="mt-4 w-full border border-white/10 bg-white/10 px-5 py-4 font-bold text-white outline-none placeholder:text-slate-500"
+              className="mt-4 w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-slate-500"
             />
 
             <button
@@ -233,8 +233,8 @@ export default function Classes() {
 
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {classes.length === 0 ? (
-            <div className="border border-white/10 bg-zinc-950 p-6">
-              <p className="font-black text-white">
+            <div className="border border-[#e5e7eb] bg-white p-6">
+              <p className="font-black text-[#111827]">
                 No classes joined yet.
               </p>
             </div>
@@ -243,11 +243,11 @@ export default function Classes() {
               <Link
                 key={item.id}
                 to={`/classes/${item.id}`}
-                className="block border border-white/10 bg-zinc-950 p-6 transition hover:border-cyan-300/30 hover:bg-white/[0.03]"
+                className="block border border-[#e5e7eb] bg-white p-6 transition hover:border-cyan-300/30 hover:bg-white/[0.03]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-black text-white">
+                    <h2 className="text-2xl font-black text-[#111827]">
                       {item.name}
                     </h2>
 
@@ -267,12 +267,12 @@ export default function Classes() {
                   </span>
                 </div>
 
-                <div className="mt-5 border border-white/10 bg-white/5 p-4">
+                <div className="mt-5 border border-[#e5e7eb] bg-white/5 p-4">
                   <p className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">
                     Join Code
                   </p>
 
-                  <p className="mt-2 text-xl font-black text-white">
+                  <p className="mt-2 text-xl font-black text-[#111827]">
                     {item.join_code}
                   </p>
                 </div>
