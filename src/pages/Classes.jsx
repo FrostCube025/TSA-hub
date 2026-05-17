@@ -72,12 +72,57 @@ export default function Classes() {
       return
     }
 
-    await supabase.from("class_members").insert({
+    const { error: memberError } = await supabase.from("class_members").insert({
       class_id: data.id,
       user_id: user.id,
       role: "owner",
       approved: true,
     })
+
+    if (memberError) {
+      setMessage(memberError.message)
+      setLoading(false)
+      return
+    }
+
+    const { error: channelError } = await supabase.from("class_channels").insert([
+      {
+        class_id: data.id,
+        name: "general",
+        restricted: false,
+        created_by: user.id,
+      },
+      {
+        class_id: data.id,
+        name: "announcements",
+        restricted: false,
+        created_by: user.id,
+      },
+      {
+        class_id: data.id,
+        name: "webmaster",
+        restricted: false,
+        created_by: user.id,
+      },
+      {
+        class_id: data.id,
+        name: "coding",
+        restricted: false,
+        created_by: user.id,
+      },
+      {
+        class_id: data.id,
+        name: "officers",
+        restricted: true,
+        created_by: user.id,
+      },
+    ])
+
+    if (channelError) {
+      setMessage(channelError.message)
+      setLoading(false)
+      return
+    }
 
     setClassName("")
     setSchoolName("")
