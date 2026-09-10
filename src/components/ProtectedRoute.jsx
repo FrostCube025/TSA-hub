@@ -6,8 +6,8 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        <p className="text-2xl font-black">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8]">
+        <p className="text-2xl font-black text-[#111827]">
           Loading...
         </p>
       </div>
@@ -20,35 +20,14 @@ export default function ProtectedRoute({ children }) {
 
   if (!profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black px-5 text-white">
-        <div className="border border-white/10 bg-zinc-950 p-10 text-center">
-          <h1 className="text-4xl font-black">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f6f8] px-5">
+        <div className="rounded-3xl border border-[#e5e7eb] bg-white p-10 text-center shadow-sm">
+          <h1 className="text-4xl font-black text-[#111827]">
             Profile Error
           </h1>
 
-          <p className="mt-4 text-slate-300">
+          <p className="mt-4 text-[#6b7280]">
             Your profile could not be loaded.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  if (profile.status === "pending") {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black px-5 text-white">
-        <div className="max-w-lg border border-yellow-500/20 bg-yellow-500/10 p-10 text-center">
-          <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-yellow-300">
-            Pending Approval
-          </p>
-
-          <h1 className="text-5xl font-black">
-            Waiting for approval
-          </h1>
-
-          <p className="mt-6 text-lg leading-8 text-yellow-100">
-            Your TSA Hub account has been created successfully,
-            but a coordinator, admin, or creator must approve your membership before you can access the platform.
           </p>
         </div>
       </div>

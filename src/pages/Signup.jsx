@@ -27,7 +27,7 @@ export default function Signup() {
         id: data.user.id,
         email,
         username,
-        status: "pending",
+        status: "active",
       })
 
       if (profileError) {

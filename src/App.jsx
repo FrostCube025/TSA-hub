@@ -14,6 +14,7 @@ import Admin from "./pages/Admin"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Profile from "./pages/Profile"
+import Sunny from "./pages/Sunny"
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
 
           <Route path="/signup" element={<Signup />} />
+          <Route path="sunny" element={<Sunny />} />
 
           <Route
             path="/"

@@ -7,21 +7,58 @@ export default function ClassWorkspace() {
   const { classId } = useParams()
   const { user, tags } = useAuth()
 
+  const [classInfo, setClassInfo] = useState(null)
   const [channels, setChannels] = useState([])
   const [selectedChannel, setSelectedChannel] = useState(null)
-
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState("")
-
   const [channelName, setChannelName] = useState("")
   const [restricted, setRestricted] = useState(false)
-
+  const [allowed, setAllowed] = useState(null)
   const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState("")
 
+  const isCreator = tags.some((tag) => tag.id === "creator")
+
   const canCreateChannels = tags.some((tag) =>
-    ["creator", "admin", "coordinator", "teacher"].includes(tag.id)
+    ["creator", "admin", "teacher"].includes(tag.id)
   )
+
+  async function checkAccess() {
+    if (isCreator) {
+      setAllowed(true)
+      return
+    }
+
+    const { data, error } = await supabase
+      .from("class_members")
+      .select("approved")
+      .eq("class_id", classId)
+      .eq("user_id", user.id)
+      .maybeSingle()
+
+    if (error || !data || !data.approved) {
+      setAllowed(false)
+      return
+    }
+
+    setAllowed(true)
+  }
+
+  async function loadClass() {
+    const { data, error } = await supabase
+      .from("classes")
+      .select("id, name, school_name")
+      .eq("id", classId)
+      .maybeSingle()
+
+    if (error) {
+      setNotice(error.message)
+      return
+    }
+
+    setClassInfo(data)
+  }
 
   async function loadChannels() {
     const { data, error } = await supabase
@@ -37,7 +74,7 @@ export default function ClassWorkspace() {
 
     setChannels(data || [])
 
-    if (data && data.length > 0 && !selectedChannel) {
+    if (data?.length && !selectedChannel) {
       setSelectedChannel(data[0])
     }
   }
@@ -53,7 +90,7 @@ export default function ClassWorkspace() {
           id,
           username,
           display_name,
-          email
+          avatar_url
         )
       `)
       .eq("channel_id", channelId)
@@ -75,12 +112,14 @@ export default function ClassWorkspace() {
     setLoading(true)
     setNotice("")
 
-    const { error } = await supabase.from("messages").insert({
-      class_id: classId,
-      channel_id: selectedChannel.id,
-      sender_id: user.id,
-      text: newMessage.trim(),
-    })
+    const { error } = await supabase
+      .from("messages")
+      .insert({
+        class_id: classId,
+        channel_id: selectedChannel.id,
+        sender_id: user.id,
+        text: newMessage.trim(),
+      })
 
     if (error) {
       setNotice(error.message)
@@ -101,11 +140,16 @@ export default function ClassWorkspace() {
     setLoading(true)
     setNotice("")
 
+    const cleanName = channelName
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+
     const { error } = await supabase
       .from("class_channels")
       .insert({
         class_id: classId,
-        name: channelName.trim().toLowerCase(),
+        name: cleanName,
         restricted,
         created_by: user.id,
       })
@@ -118,16 +162,23 @@ export default function ClassWorkspace() {
 
     setChannelName("")
     setRestricted(false)
-
     await loadChannels()
-
     setNotice("Channel created.")
     setLoading(false)
   }
 
   useEffect(() => {
-    loadChannels()
-  }, [classId])
+    if (user) {
+      checkAccess()
+    }
+  }, [user, classId, isCreator])
+
+  useEffect(() => {
+    if (allowed) {
+      loadClass()
+      loadChannels()
+    }
+  }, [allowed, classId])
 
   useEffect(() => {
     if (selectedChannel) {
@@ -135,43 +186,75 @@ export default function ClassWorkspace() {
     }
   }, [selectedChannel])
 
+  if (allowed === null) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="font-black text-[var(--text-muted)]">
+          Loading class...
+        </p>
+      </div>
+    )
+  }
+
+  if (!allowed) {
+    return (
+      <div className="mx-auto mt-16 max-w-xl rounded-3xl border border-amber-200 bg-amber-50 p-8 text-center">
+        <h1 className="text-3xl font-black text-amber-800">
+          Class access pending
+        </h1>
+
+        <p className="mt-3 text-amber-700">
+          A teacher or class owner must approve your request before you can access this class.
+        </p>
+
+        <Link
+          to="/classes"
+          className="mt-6 inline-block rounded-2xl bg-[var(--primary)] px-6 py-3 font-black text-white"
+        >
+          Back to Classes
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <div className="pb-24">
-      <Link to="/classes" className="text-sm font-black text-[#21c064]">
+      <Link
+        to="/classes"
+        className="text-sm font-black text-[var(--primary)]"
+      >
         ← Back to Classes
       </Link>
 
-      <div className="mt-6 rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-sm">
-        <p className="text-sm font-black uppercase tracking-[0.25em] text-[#21c064]">
+      <div className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--primary)]">
           Class Workspace
         </p>
 
-        <h1 className="mt-3 text-4xl font-black text-[#111827]">
-          TSA Class Hub
+        <h1 className="mt-2 text-4xl font-black text-[var(--text)]">
+          {classInfo?.name || "TSA Class"}
         </h1>
 
-        <p className="mt-3 max-w-3xl text-[#4b5563]">
-          Private class space with channels, messages, assignments, projects, and members.
+        <p className="mt-2 text-[var(--text-muted)]">
+          {classInfo?.school_name || "Technology Student Association"}
         </p>
       </div>
 
       {notice && (
-        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-700">
+        <div className="mt-5 rounded-2xl bg-[var(--primary-soft)] p-4 font-bold text-[var(--primary-hover)]">
           {notice}
         </div>
       )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
-        <aside className="rounded-3xl border border-[#e5e7eb] bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#6b7280]">
-              Channels
-            </p>
-          </div>
+        <aside className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
+          <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
+            Channels
+          </p>
 
-          <div className="mt-4 space-y-1">
+          <div className="space-y-1">
             {channels.length === 0 ? (
-              <p className="rounded-2xl bg-[#f9fafb] p-4 text-sm font-bold text-[#6b7280]">
+              <p className="rounded-2xl bg-[var(--surface-soft)] p-4 text-sm font-bold text-[var(--text-muted)]">
                 No channels yet.
               </p>
             ) : (
@@ -182,28 +265,20 @@ export default function ClassWorkspace() {
                   <button
                     key={channel.id}
                     onClick={() => setSelectedChannel(channel)}
-                    className={`flex w-full items-center justify-between gap-2 rounded-2xl px-4 py-3 text-left text-sm font-black transition ${
+                    className={`flex w-full items-center justify-between gap-2 rounded-xl px-4 py-3 text-left text-sm font-black transition ${
                       active
-                        ? "bg-[#21c064] text-white"
-                        : "text-[#4b5563] hover:bg-[#f3f4f6]"
+                        ? "bg-[var(--primary-soft)] text-[var(--primary-hover)]"
+                        : "text-[var(--text-muted)] hover:bg-[var(--surface-soft)] hover:text-[var(--text)]"
                     }`}
                   >
                     <span>
-                      <span className={active ? "text-white" : "text-[#9ca3af]"}>
-                        #
-                      </span>{" "}
+                      <span className="opacity-60">#</span>{" "}
                       {channel.name}
                     </span>
 
                     {channel.restricted && (
-                      <span
-                        className={`rounded-full px-2 py-1 text-[10px] font-black ${
-                          active
-                            ? "bg-white/20 text-white"
-                            : "bg-yellow-50 text-yellow-700"
-                        }`}
-                      >
-                        private
+                      <span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] text-amber-700">
+                        Private
                       </span>
                     )}
                   </button>
@@ -213,8 +288,11 @@ export default function ClassWorkspace() {
           </div>
 
           {canCreateChannels && (
-            <form onSubmit={createChannel} className="mt-8">
-              <p className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[#6b7280]">
+            <form
+              onSubmit={createChannel}
+              className="mt-8 border-t border-[var(--border)] pt-5"
+            >
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
                 Create Channel
               </p>
 
@@ -222,66 +300,48 @@ export default function ClassWorkspace() {
                 value={channelName}
                 onChange={(e) => setChannelName(e.target.value)}
                 placeholder="channel-name"
-                className="w-full rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-4 py-3 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface-soft)] px-4 py-3 font-bold text-[var(--text)] outline-none focus:border-[var(--primary)]"
               />
 
-              <label className="mt-4 flex items-center gap-3 text-sm font-bold text-[#4b5563]">
+              <label className="mt-4 flex items-center gap-3 text-sm font-bold text-[var(--text-muted)]">
                 <input
                   type="checkbox"
                   checked={restricted}
                   onChange={(e) => setRestricted(e.target.checked)}
                 />
-
-                Private Channel
+                Restricted channel
               </label>
 
               <button
                 disabled={loading}
-                className="mt-4 w-full rounded-2xl bg-[#21c064] px-4 py-3 font-black text-white disabled:opacity-60"
+                className="mt-4 w-full rounded-xl bg-[var(--primary)] px-4 py-3 font-black text-white hover:bg-[var(--primary-hover)] disabled:opacity-60"
               >
                 Create Channel
               </button>
             </form>
           )}
-
-          <div className="mt-8 rounded-2xl bg-[#f9fafb] p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#9ca3af]">
-              Class ID
-            </p>
-
-            <p className="mt-2 break-all text-xs font-bold text-[#6b7280]">
-              {classId}
-            </p>
-          </div>
         </aside>
 
-        <section className="flex min-h-[650px] flex-col overflow-hidden rounded-3xl border border-[#e5e7eb] bg-white shadow-sm">
-          <div className="border-b border-[#e5e7eb] px-6 py-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[#9ca3af]">#</span>
+        <section className="flex min-h-[650px] flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+          <div className="border-b border-[var(--border)] px-6 py-4">
+            <h2 className="text-lg font-black text-[var(--text)]">
+              <span className="text-[var(--text-muted)]">#</span>{" "}
+              {selectedChannel?.name || "Select a channel"}
+            </h2>
 
-              <h2 className="text-xl font-black text-[#111827]">
-                {selectedChannel?.name || "no-channel"}
-              </h2>
-            </div>
-
-            <p className="mt-1 text-sm font-medium text-[#6b7280]">
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
               {selectedChannel?.restricted
-                ? "Restricted channel."
-                : "Class-wide discussion channel."}
+                ? "Restricted channel"
+                : "Class discussion"}
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-[#f9fafb] p-6">
+          <div className="flex-1 overflow-y-auto bg-[var(--surface-soft)] p-6">
             <div className="space-y-6">
               {messages.length === 0 ? (
-                <div className="rounded-3xl bg-white p-6 text-center">
-                  <p className="font-black text-[#111827]">
+                <div className="rounded-2xl bg-[var(--surface)] p-6 text-center">
+                  <p className="font-black text-[var(--text)]">
                     No messages yet.
-                  </p>
-
-                  <p className="mt-2 text-sm text-[#6b7280]">
-                    Start the conversation in this channel.
                   </p>
                 </div>
               ) : (
@@ -292,23 +352,17 @@ export default function ClassWorkspace() {
                     "Member"
 
                   return (
-                    <div key={message.id} className="flex gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#21c064] font-black text-white">
+                    <div key={message.id} className="flex gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] font-black text-white">
                         {senderName.charAt(0).toUpperCase()}
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-black text-[#111827]">
-                            {senderName}
-                          </p>
+                      <div>
+                        <p className="font-black text-[var(--text)]">
+                          {senderName}
+                        </p>
 
-                          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">
-                            Member
-                          </span>
-                        </div>
-
-                        <p className="mt-2 leading-7 text-[#374151]">
+                        <p className="mt-1 leading-7 text-[var(--text)]">
                           {message.text}
                         </p>
                       </div>
@@ -319,7 +373,10 @@ export default function ClassWorkspace() {
             </div>
           </div>
 
-          <form onSubmit={sendMessage} className="border-t border-[#e5e7eb] bg-white p-4">
+          <form
+            onSubmit={sendMessage}
+            className="border-t border-[var(--border)] p-4"
+          >
             <div className="flex gap-3">
               <input
                 value={newMessage}
@@ -330,12 +387,12 @@ export default function ClassWorkspace() {
                     : "Select a channel"
                 }
                 disabled={!selectedChannel || loading}
-                className="min-w-0 flex-1 rounded-2xl border border-[#e5e7eb] bg-[#f9fafb] px-5 py-4 font-bold text-[#111827] outline-none placeholder:text-[#9ca3af] focus:border-[#21c064]"
+                className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4 font-bold text-[var(--text)] outline-none focus:border-[var(--primary)]"
               />
 
               <button
                 disabled={!selectedChannel || loading}
-                className="rounded-2xl bg-[#21c064] px-6 py-4 font-black text-white disabled:opacity-60"
+                className="rounded-xl bg-[var(--primary)] px-6 py-4 font-black text-white hover:bg-[var(--primary-hover)] disabled:opacity-60"
               >
                 Send
               </button>

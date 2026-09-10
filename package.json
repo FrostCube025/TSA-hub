@@ -21,7 +21,7 @@
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.37.1",
+    "@cloudflare/vite-plugin": "^1.54.7",
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
