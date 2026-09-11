@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClient"
 
 export default function Login() {
   const navigate = useNavigate()
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -11,106 +12,168 @@ export default function Login() {
 
   async function handleLogin(e) {
     e.preventDefault()
+
     setLoading(true)
     setMessage("")
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-      if (error) {
-        setMessage(error.message)
-        return
-      }
-
-      if (!data.user) {
-        setMessage("Login failed. No user returned.")
-        return
-      }
-
-      navigate("/dashboard")
-    } catch (err) {
-      setMessage("Something went wrong while signing in.")
-    } finally {
+    if (error) {
+      setMessage(error.message)
       setLoading(false)
+      return
     }
+
+    if (!data.user) {
+      setMessage("Login failed.")
+      setLoading(false)
+      return
+    }
+
+    navigate("/dashboard")
+    setLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-black px-5 py-10 text-[#111827]">
-      <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center">
-        <div className="grid w-full gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-          <div className="hidden lg:block">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-cyan-200">
-              TSA Hub
-            </p>
+    <div className="min-h-screen bg-[var(--bg)] px-5 py-10">
 
-            <h1 className="text-6xl font-black leading-tight text-[#111827]">
-              Access your team command center.
-            </h1>
+      <div className="mx-auto grid min-h-[calc(100vh-80px)] max-w-6xl items-center gap-10 lg:grid-cols-2">
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-[#4b5563]">
-              Sign in to view projects, assignments, chats, submissions, and member-only tools.
-            </p>
-          </div>
+        {/* Left side */}
+        <div className="hidden lg:block">
 
-          <div className="border border-[#e5e7eb] bg-slate-900/90 p-6 shadow-2xl shadow-black/30 sm:p-8">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-cyan-200">
-              Login
-            </p>
+          <p className="text-sm font-black uppercase tracking-[0.3em] text-[var(--primary)]">
+            TSA Hub
+          </p>
 
-            <h2 className="text-4xl font-black text-[#111827]">
-              Welcome back
-            </h2>
+          <h1 className="mt-5 text-6xl font-black leading-tight text-[var(--text)]">
+            Your TSA team,
+            <br />
+            connected.
+          </h1>
 
-            <p className="mt-3 text-[#4b5563]">
-              Sign in with your approved TSA Hub account.
-            </p>
+          <p className="mt-6 max-w-xl text-xl leading-8 text-[var(--text-muted)]">
+            Collaborate on projects, communicate with your team, track events,
+            and organize your TSA experience in one place.
+          </p>
 
-            <form onSubmit={handleLogin} className="mt-8 space-y-4">
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 text-[#111827] outline-none placeholder:text-slate-400"
-              />
 
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full border border-[#e5e7eb] bg-white/10 px-5 py-4 text-[#111827] outline-none placeholder:text-slate-400"
-              />
+          <div className="mt-10 grid max-w-lg gap-4">
 
-              <button
-                disabled={loading}
-                className="w-full bg-cyan-300 px-5 py-4 font-black text-slate-950 disabled:opacity-60"
+            {[
+              "Class collaboration",
+              "Project management",
+              "Competition preparation",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-[var(--border)] bg-white p-4 font-black text-[var(--text)] shadow-sm"
               >
-                {loading ? "Signing in..." : "Sign In"}
-              </button>
-            </form>
+                ✓ {item}
+              </div>
+            ))}
 
-            {message && (
-              <p className="mt-5 border border-red-300/20 bg-red-400/10 p-4 text-sm font-bold text-red-100">
-                {message}
-              </p>
-            )}
-
-            <p className="mt-6 text-center text-sm text-slate-400">
-              Need an account?{" "}
-              <Link to="/signup" className="font-black text-cyan-200">
-                Create one
-              </Link>
-            </p>
           </div>
+
         </div>
+
+
+        {/* Login card */}
+        <div className="rounded-3xl border border-[var(--border)] bg-white p-8 shadow-xl">
+
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-[var(--primary)]">
+            Login
+          </p>
+
+
+          <h2 className="mt-3 text-4xl font-black text-[var(--text)]">
+            Welcome back
+          </h2>
+
+
+          <p className="mt-3 text-[var(--text-muted)]">
+            Sign in to access TSA Hub.
+          </p>
+
+
+          <button
+            type="button"
+            className="mt-8 w-full rounded-2xl border border-[var(--border)] bg-white px-5 py-4 font-black text-[var(--text)] transition hover:bg-[var(--surface-soft)]"
+          >
+            Continue with Google
+          </button>
+
+
+          <div className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-[var(--border)]" />
+
+            <span className="text-xs font-black uppercase text-[var(--text-muted)]">
+              or
+            </span>
+
+            <div className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+
+
+          <form
+            onSubmit={handleLogin}
+            className="space-y-4"
+          >
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4 font-bold text-[var(--text)] outline-none placeholder:text-gray-400 focus:border-[var(--primary)]"
+            />
+
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4 font-bold text-[var(--text)] outline-none placeholder:text-gray-400 focus:border-[var(--primary)]"
+            />
+
+
+            <button
+              disabled={loading}
+              className="w-full rounded-2xl bg-[var(--primary)] px-5 py-4 font-black text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+            >
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+
+          </form>
+
+
+          {message && (
+            <div className="mt-5 rounded-2xl bg-red-50 p-4 text-sm font-bold text-red-700">
+              {message}
+            </div>
+          )}
+
+
+          <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
+            Need an account?{" "}
+            <Link
+              to="/signup"
+              className="font-black text-[var(--primary)]"
+            >
+              Create one
+            </Link>
+          </p>
+
+        </div>
+
       </div>
+
     </div>
   )
 }
