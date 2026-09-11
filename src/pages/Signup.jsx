@@ -6,15 +6,20 @@ export default function Signup() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [username, setUsername] = useState("")
+
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
 
   async function handleSignup(e) {
     e.preventDefault()
+
     setLoading(true)
     setMessage("")
 
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    })
 
     if (error) {
       setMessage(error.message)
@@ -23,17 +28,21 @@ export default function Signup() {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        email,
-        username,
-        status: "active",
-      })
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          email,
+          username,
+          status: "active",
+        })
 
       if (profileError) {
         setMessage(profileError.message)
       } else {
-        setMessage("Account created. Waiting for approval.")
+        setMessage(
+          "Account created. Please check your email to confirm your account."
+        )
       }
     }
 
@@ -41,97 +50,157 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#155e75,transparent_35%),radial-gradient(circle_at_top_right,#581c87,transparent_30%),#020617] px-5 py-10 text-white">
-      <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl items-center justify-center">
-        <div className="grid w-full gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-          <div className="hidden lg:block">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-cyan-200">
-              TSA Hub
-            </p>
+    <div className="min-h-screen bg-[var(--bg)] px-5 py-10">
 
-            <h1 className="text-6xl font-black leading-tight text-white">
-              Join your team’s command center.
-            </h1>
+      <div className="mx-auto grid min-h-[calc(100vh-80px)] max-w-6xl items-center gap-10 lg:grid-cols-2">
 
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-              Create your TSA Hub account to access projects, assignments, submissions,
-              team chat, and member resources after approval.
-            </p>
+        {/* Left side */}
+        <div className="hidden lg:block">
 
-            <div className="mt-8 grid max-w-xl gap-4 sm:grid-cols-3">
-              {["Secure", "Private", "Member-only"].map((item) => (
-                <div key={item} className="rounded-2xl border border-white/10 bg-white/10 p-4 text-center font-black">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
+          <p className="text-sm font-black uppercase tracking-[0.3em] text-[var(--primary)]">
+            TSA Hub
+          </p>
 
-          <div className="rounded-[2rem] border border-white/10 bg-slate-900/90 p-6 shadow-2xl shadow-black/30 sm:p-8">
-            <p className="mb-3 text-sm font-black uppercase tracking-[0.25em] text-cyan-200">
-              Create Profile
-            </p>
+          <h1 className="mt-5 text-6xl font-black leading-tight text-[var(--text)]">
+            Build,
+            <br />
+            collaborate,
+            <br />
+            compete.
+          </h1>
 
-            <h2 className="text-4xl font-black text-white">
-              Sign up
-            </h2>
+          <p className="mt-6 max-w-xl text-xl leading-8 text-[var(--text-muted)]">
+            Join your TSA community and collaborate on projects,
+            competitions, assignments, and team activities.
+          </p>
 
-            <p className="mt-3 text-slate-300">
-              Your account will start as pending until a coordinator approves it.
-            </p>
 
-            <form onSubmit={handleSignup} className="mt-8 space-y-4">
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-white outline-none placeholder:text-slate-400"
-              />
+          <div className="mt-10 grid max-w-lg gap-4">
 
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-white outline-none placeholder:text-slate-400"
-              />
-
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-white outline-none placeholder:text-slate-400"
-              />
-
-              <button
-                disabled={loading}
-                className="w-full rounded-2xl bg-cyan-300 px-5 py-4 font-black text-slate-950 disabled:opacity-60"
+            {[
+              "Private class spaces",
+              "Team collaboration",
+              "Competition tools",
+            ].map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-[var(--border)] bg-white p-4 font-black text-[var(--text)] shadow-sm"
               >
-                {loading ? "Creating..." : "Create Account"}
-              </button>
-            </form>
+                ✓ {item}
+              </div>
+            ))}
 
-            {message && (
-              <p className="mt-5 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4 text-sm font-bold text-cyan-100">
-                {message}
-              </p>
-            )}
-
-            <p className="mt-6 text-center text-sm text-slate-400">
-              Already have an account?{" "}
-              <Link to="/login" className="font-black text-cyan-200">
-                Sign in
-              </Link>
-            </p>
           </div>
+
         </div>
+
+
+        {/* Signup card */}
+        <div className="rounded-3xl border border-[var(--border)] bg-white p-8 shadow-xl">
+
+          <p className="text-sm font-black uppercase tracking-[0.25em] text-[var(--primary)]">
+            Create Account
+          </p>
+
+
+          <h2 className="mt-3 text-4xl font-black text-[var(--text)]">
+            Join TSA Hub
+          </h2>
+
+
+          <p className="mt-3 text-[var(--text-muted)]">
+            Create your account and join your TSA class.
+          </p>
+
+
+          <button
+            type="button"
+            className="mt-8 w-full rounded-2xl border border-[var(--border)] bg-white px-5 py-4 font-black text-[var(--text)] transition hover:bg-[var(--surface-soft)]"
+          >
+            Continue with Google
+          </button>
+
+
+          <div className="my-6 flex items-center gap-4">
+
+            <div className="h-px flex-1 bg-[var(--border)]" />
+
+            <span className="text-xs font-black uppercase text-[var(--text-muted)]">
+              or
+            </span>
+
+            <div className="h-px flex-1 bg-[var(--border)]" />
+
+          </div>
+
+
+          <form
+            onSubmit={handleSignup}
+            className="space-y-4"
+          >
+
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4 font-bold text-[var(--text)] outline-none placeholder:text-gray-400 focus:border-[var(--primary)]"
+            />
+
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4 font-bold text-[var(--text)] outline-none placeholder:text-gray-400 focus:border-[var(--primary)]"
+            />
+
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface-soft)] px-5 py-4 font-bold text-[var(--text)] outline-none placeholder:text-gray-400 focus:border-[var(--primary)]"
+            />
+
+
+            <button
+              disabled={loading}
+              className="w-full rounded-2xl bg-[var(--primary)] px-5 py-4 font-black text-white transition hover:bg-[var(--primary-hover)] disabled:opacity-60"
+            >
+              {loading ? "Creating..." : "Create Account"}
+            </button>
+
+          </form>
+
+
+          {message && (
+            <div className="mt-5 rounded-2xl bg-[var(--primary-soft)] p-4 text-sm font-bold text-[var(--primary-hover)]">
+              {message}
+            </div>
+          )}
+
+
+          <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-black text-[var(--primary)]"
+            >
+              Sign in
+            </Link>
+          </p>
+
+        </div>
+
       </div>
+
     </div>
   )
 }
