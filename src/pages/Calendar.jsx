@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react"
 import { supabase } from "../lib/supabaseClient"
 import { useAuth } from "../context/AuthContext"
 
@@ -42,6 +42,11 @@ export default function Calendar() {
   const [time, setTime] = useState("")
   const [type, setType] = useState("task")
   const [description, setDescription] = useState("")
+
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [jumpMonth, setJumpMonth] = useState(today.getMonth())
+  const [jumpYear, setJumpYear] = useState(today.getFullYear())
+  const [jumpDay, setJumpDay] = useState(today.getDate())
 
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -101,6 +106,10 @@ export default function Calendar() {
     return cells
   }, [viewYear, viewMonth])
 
+  const maxJumpDay = useMemo(() => {
+    return new Date(jumpYear, jumpMonth + 1, 0).getDate()
+  }, [jumpYear, jumpMonth])
+
   function getDateString(day) {
     const month = String(viewMonth + 1).padStart(2, "0")
     const dateDay = String(day).padStart(2, "0")
@@ -136,11 +145,56 @@ export default function Calendar() {
     }
   }
 
+  function openDatePicker() {
+    setJumpMonth(viewMonth)
+    setJumpYear(viewYear)
+
+    if (
+      viewMonth === today.getMonth() &&
+      viewYear === today.getFullYear()
+    ) {
+      setJumpDay(today.getDate())
+    } else {
+      setJumpDay(1)
+    }
+
+    setShowDatePicker(true)
+  }
+
+  function jumpToDate() {
+    const safeDay = Math.min(
+      Math.max(Number(jumpDay) || 1, 1),
+      maxJumpDay
+    )
+
+    setJumpDay(safeDay)
+    setViewMonth(Number(jumpMonth))
+    setViewYear(Number(jumpYear))
+    setShowDatePicker(false)
+
+    setTimeout(() => {
+      const element = document.getElementById(
+        `calendar-day-${jumpYear}-${jumpMonth}-${safeDay}`
+      )
+
+      element?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      })
+    }, 100)
+  }
+
   function goToToday() {
     const now = new Date()
 
-    setViewYear(now.getFullYear())
     setViewMonth(now.getMonth())
+    setViewYear(now.getFullYear())
+
+    setJumpMonth(now.getMonth())
+    setJumpYear(now.getFullYear())
+    setJumpDay(now.getDate())
+
+    setShowDatePicker(false)
   }
 
   async function createEvent(e) {
@@ -186,7 +240,9 @@ export default function Calendar() {
   }
 
   function formatEventDate(event) {
-    const eventDate = new Date(`${event.event_date}T12:00:00`)
+    const eventDate = new Date(
+      `${event.event_date}T12:00:00`
+    )
 
     return eventDate.toLocaleDateString(undefined, {
       weekday: "long",
@@ -218,12 +274,8 @@ export default function Calendar() {
       )}
 
       <div className="mt-10 grid gap-6 xl:grid-cols-[1fr_360px]">
-
-        {/* CALENDAR */}
         <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
             <div>
               <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
                 Month View
@@ -235,7 +287,6 @@ export default function Calendar() {
             </div>
 
             <div className="flex items-center gap-2">
-
               <button
                 onClick={previousMonth}
                 className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border)] bg-white text-[var(--text)] transition hover:bg-[var(--surface-soft)]"
@@ -245,10 +296,11 @@ export default function Calendar() {
               </button>
 
               <button
-                onClick={goToToday}
-                className="rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-black text-[var(--text)] transition hover:bg-[var(--surface-soft)]"
+                onClick={openDatePicker}
+                className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-black text-[var(--text)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
               >
-                Today
+                <CalendarDays className="h-4 w-4" />
+                Choose Date
               </button>
 
               <button
@@ -258,7 +310,6 @@ export default function Calendar() {
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
-
             </div>
           </div>
 
@@ -294,12 +345,18 @@ export default function Calendar() {
             {days.map((day, index) => {
               const dayEvents = day
                 ? events.filter(
-                    (event) => event.event_date === getDateString(day)
+                    (event) =>
+                      event.event_date === getDateString(day)
                   )
                 : []
 
               return (
                 <div
+                  id={
+                    day
+                      ? `calendar-day-${viewYear}-${viewMonth}-${day}`
+                      : undefined
+                  }
                   key={`${viewYear}-${viewMonth}-${index}`}
                   className={`min-h-[110px] rounded-2xl border p-2 sm:p-3 ${
                     day
@@ -342,10 +399,7 @@ export default function Calendar() {
           </div>
         </div>
 
-
-        {/* RIGHT COLUMN */}
         <div className="space-y-6">
-
           <form
             onSubmit={createEvent}
             className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
@@ -404,16 +458,12 @@ export default function Calendar() {
             </button>
           </form>
 
-
-          {/* NEWS FEED */}
           <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-
             <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
               News Feed
             </p>
 
             <div className="mt-5 space-y-4">
-
               {posts.length === 0 ? (
                 <div className="rounded-2xl bg-[var(--surface-soft)] p-5">
                   <p className="font-black text-[var(--text)]">
@@ -436,73 +486,45 @@ export default function Calendar() {
                   </div>
                 ))
               )}
-
             </div>
           </div>
-
         </div>
       </div>
 
-
-      {/* EVENT POPUP */}
-      {selectedEvent && (
+      {showDatePicker && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-5 backdrop-blur-sm"
-          onClick={() => setSelectedEvent(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-5 backdrop-blur-sm"
+          onClick={() => setShowDatePicker(false)}
         >
           <div
-            className="w-full max-w-lg rounded-3xl bg-white p-7 shadow-2xl"
+            className="w-full max-w-md rounded-3xl border border-[var(--border)] bg-white p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[var(--primary)]">
+              Jump to date
+            </p>
 
-            <div className="flex items-start justify-between gap-5">
+            <h2 className="mt-2 text-3xl font-black text-[var(--text)]">
+              Choose a date
+            </h2>
 
-              <div className="min-w-0">
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-black uppercase tracking-[0.15em] text-[var(--text-muted)]">
+                  Month
+                </label>
 
-                <span
-                  className={`inline-block rounded-full px-3 py-2 text-xs font-black capitalize ${
-                    typeStyles[selectedEvent.event_type] ||
-                    typeStyles.task
-                  }`}
-                >
-                  {selectedEvent.event_type}
-                </span>
+                <select
+                  value={jumpMonth}
+                  onChange={(e) => {
+                    const newMonth = Number(e.target.value)
+                    const newMax = new Date(
+                      jumpYear,
+                      newMonth + 1,
+                      0
+                    ).getDate()
 
-                <h2 className="mt-5 text-3xl font-black text-[var(--text)]">
-                  {selectedEvent.title}
-                </h2>
+                    setJumpMonth(newMonth)
 
-                <p className="mt-3 font-bold text-[var(--text-muted)]">
-                  {formatEventDate(selectedEvent)}
-                </p>
-
-                {selectedEvent.event_time && (
-                  <p className="mt-1 font-bold text-[var(--text-muted)]">
-                    {selectedEvent.event_time}
-                  </p>
-                )}
-
-                <p className="mt-5 leading-7 text-[var(--text-muted)]">
-                  {selectedEvent.description ||
-                    "No description provided."}
-                </p>
-
-              </div>
-
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface-soft)] font-black text-[var(--text)] transition hover:bg-gray-200"
-                aria-label="Close event"
-              >
-                ×
-              </button>
-
-            </div>
-
-          </div>
-        </div>
-      )}
-
-    </div>
-  )
-}
+                    if (jumpDay > newMax) {
+                      setJumpDay(newMax)
